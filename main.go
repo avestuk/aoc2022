@@ -3,11 +3,11 @@ package main
 import (
 	"fmt"
 
-	"github.com/avestuk/aoc2022/day1"
+	"github.com/avestuk/aoc2022/day2"
 )
 
 func main() {
-	mostCalories, err := day1.Day1Part2("./day1/day1_input.txt")
+	mostCalories, err := day2.Day2Part2("./day2/day2_input.txt")
 	if err != nil {
 		fmt.Print(err)
 	}

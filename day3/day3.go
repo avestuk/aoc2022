@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/avestuk/aoc2022/pkg/parse"
+	mapset "github.com/deckarep/golang-set/v2"
 )
 
 func Day3(file string) (int, error) {
@@ -110,4 +111,25 @@ func findIntersection(rucksacks []string) rune {
 	}
 
 	panic(fmt.Sprintf("no matches found for: %v", rucksacks))
+}
+
+func findIntersectionSet(rucksacks []string) rune {
+	rucksack0 := mapset.NewSet[rune]()
+	rucksack1 := mapset.NewSet[rune]()
+	rucksack2 := mapset.NewSet[rune]()
+
+	for _, item := range rucksacks[0] {
+		rucksack0.Add(item)
+	}
+
+	for _, item := range rucksacks[1] {
+		rucksack1.Add(item)
+	}
+
+	for _, item := range rucksacks[2] {
+		rucksack2.Add(item)
+	}
+
+	common, _ := rucksack0.Intersect(rucksack1).Intersect(rucksack2).Pop()
+	return common
 }

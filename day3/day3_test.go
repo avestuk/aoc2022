@@ -65,7 +65,7 @@ func TestFindIntersection(t *testing.T) {
 		"jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL",
 		"PmmdzqPrVvPwwTWBwg",
 	}
-	got := findIntersection(rucksacks)
+	got := findIntersectionSet(rucksacks)
 	want := 'r'
 
 	if got != want {

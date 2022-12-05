@@ -3,14 +3,14 @@ package main
 import (
 	"fmt"
 
-	"github.com/avestuk/aoc2022/day4"
+	"github.com/avestuk/aoc2022/day5"
 )
 
 func main() {
-	output, err := day4.Day4PartTwo("./day4/input.txt")
+	output, err := day5.Day5("./day5/input.txt")
 	if err != nil {
 		fmt.Print(err)
 	}
 
-	fmt.Printf("%d", output)
+	fmt.Printf("%s", output)
 }

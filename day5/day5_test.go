@@ -31,8 +31,10 @@ func TestGetStacks(t *testing.T) {
 	got := getStacks(s)
 
 	for i, stack := range got {
-		if !reflect.DeepEqual(stack, want[i]) {
-			t.Fatalf("got: %v, want: %v", stack, want[i])
+		if len(stack) != 0 {
+			if !reflect.DeepEqual(stack, want[i]) {
+				t.Fatalf("got: %v, want: %v", stack, want[i])
+			}
 		}
 	}
 }
@@ -48,6 +50,24 @@ func TestMoveStacks(t *testing.T) {
 
 	got := moveStacks(s, stacks)
 	want := "CMZ"
+
+	if got != want {
+		t.Fatalf("got: %s, want: %s", got, want)
+	}
+
+}
+
+func TestMoveStacksMultiple(t *testing.T) {
+	s, close, err := parse.ParseInput("./test.txt")
+	if err != nil {
+		t.Fatalf(fmt.Sprintf("failed to parse file, got error: %s", err))
+	}
+	defer close()
+
+	stacks := getStacks(s)
+
+	got := moveStacksMultiple(s, stacks)
+	want := "MCD"
 
 	if got != want {
 		t.Fatalf("got: %s, want: %s", got, want)

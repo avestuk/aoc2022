@@ -21,23 +21,17 @@ func Day5(file string) (string, error) {
 	return topContainers, nil
 }
 
-func Day5PartTwo(file string) (int, error) {
+func Day5PartTwo(file string) (string, error) {
 	s, close, err := parse.ParseInput(file)
 	if err != nil {
-		return 0, fmt.Errorf("failed to parse file, got error: %s", err)
+		return "", fmt.Errorf("failed to parse file, got error: %s", err)
 	}
 	defer close()
 
-	totalFullContains := 0
-	for s.Scan() {
-		if len(s.Text()) == 0 {
-			// Does this happen?
-			panic("got empty line")
-		}
-	}
+	stacks := getStacks(s)
+	topContainers := moveStacksMultiple(s, stacks)
 
-	return totalFullContains, nil
-
+	return topContainers, nil
 }
 
 func getStacks(s *bufio.Scanner) [][]string {
@@ -112,14 +106,43 @@ func moveStacks(s *bufio.Scanner, stacks [][]string) string {
 
 	var topContainers string
 	for _, stack := range stacks {
-		topContainers += stack[0]
-
+		if len(stack) != 0 {
+			topContainers += stack[0]
+		}
 	}
 
 	return topContainers
 }
 
-func moveStacksMultiple(s *bufio.Scanner, stacks [][]string) string {}
+func moveStacksMultiple(s *bufio.Scanner, stacks [][]string) string {
+	for s.Scan() {
+		if len(s.Text()) == 0 {
+			panic("text length was 0")
+		}
+
+		numberToMove, sourceIndex, destinationIndex := parseInstructions(s.Text())
+		source := stacks[sourceIndex]
+		destination := stacks[destinationIndex]
+
+		containers := make([]string, numberToMove)
+
+		copy(containers, source[:numberToMove])
+		source = source[numberToMove:]
+		destination = append(containers, destination...)
+
+		stacks[sourceIndex] = source
+		stacks[destinationIndex] = destination
+	}
+
+	var topContainers string
+	for _, stack := range stacks {
+		if len(stack) != 0 {
+			topContainers += stack[0]
+		}
+	}
+
+	return topContainers
+}
 
 func parseInstructions(s string) (numberToMove, source, destination int) {
 	matches, err := fmt.Sscanf(s, "move %d from %d to %d", &numberToMove, &source, &destination)

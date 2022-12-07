@@ -3,6 +3,7 @@ package day7
 import (
 	"bufio"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 
@@ -16,12 +17,30 @@ func Day7(file string) (int, error) {
 	}
 	defer close()
 
-	for s.Scan() {
-		return 0, nil
+	directories := parseLines(s)
+	return directories.filterSizes(100000), nil
+}
 
+func Day7PartTwo(file string) (int, error) {
+	s, close, err := parse.ParseInput(file)
+	if err != nil {
+		return 0, fmt.Errorf("failed to parse file, got error: %s", err)
 	}
+	defer close()
 
-	return 0, nil
+	directories := parseLines(s)
+
+	unusedSpace := 70000000 - directories.size
+	requiredSpace := 30000000 - unusedSpace
+	subDirSizes := directories.findDirToDelete(requiredSpace)
+
+	smallestDir := math.MaxInt
+	for _, size := range subDirSizes {
+		if size >= requiredSpace && size < smallestDir {
+			smallestDir = size
+		}
+	}
+	return smallestDir, nil
 }
 
 func parseLines(s *bufio.Scanner) *directory {
@@ -125,4 +144,35 @@ func (d *directory) filterSizes(sizeLimit int) int {
 		return total + d.size
 	}
 	return total
+}
+
+// 8381165
+// func (d *directory) findDirToDelete(requiredSpace int) []int {
+// 	subDirSizes := []int{}
+// 	if len(d.subDirs) != 0 {
+// 		for _, subDir := range d.subDirs {
+// 			if subDir.size >= requiredSpace {
+// 				subDirSizes = append(subDirSizes, subDir.findDirToDelete(requiredSpace)...)
+// 			}
+// 		}
+// 	}
+//
+// 	if d.size >= requiredSpace {
+// 		subDirSizes = append(subDirSizes, d.size)
+// 	}
+//
+// 	return subDirSizes
+// }
+
+func (d *directory) findDirToDelete(requiredSpace int) []int {
+	subDirSizes := []int{}
+	if len(d.subDirs) != 0 {
+		for _, subDir := range d.subDirs {
+			subDirSizes = append(subDirSizes, subDir.findDirToDelete(requiredSpace)...)
+		}
+	}
+
+	subDirSizes = append(subDirSizes, d.size)
+
+	return subDirSizes
 }

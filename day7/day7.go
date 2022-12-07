@@ -24,13 +24,8 @@ func Day7(file string) (int, error) {
 	return 0, nil
 }
 
-func parseLines(s *bufio.Scanner) directory {
-	root := directory{
-		name:    "/",
-		size:    0,
-		subDirs: []directory{},
-	}
-
+func parseLines(s *bufio.Scanner) *directory {
+	root := newDirectory("/", nil)
 	var (
 		cwd        *directory
 		lsContents bool
@@ -45,7 +40,7 @@ func parseLines(s *bufio.Scanner) directory {
 			cwdString := strings.Split(text, " ")[2]
 
 			if cwdString == "/" {
-				cwd = &root
+				cwd = root
 				continue
 			}
 
@@ -59,7 +54,7 @@ func parseLines(s *bufio.Scanner) directory {
 			for _, subDir := range cwd.subDirs {
 				subDir := subDir
 				if subDir.name == cwdString {
-					cwd = &subDir
+					cwd = subDir
 					subDirFound = true
 				}
 			}
@@ -78,12 +73,7 @@ func parseLines(s *bufio.Scanner) directory {
 			}
 
 			subDir := strings.Split(text, " ")[1]
-
-			cwd.subDirs = append(cwd.subDirs, directory{
-				name:    subDir,
-				parent:  &(*cwd),
-				subDirs: []directory{},
-			})
+			cwd.subDirs = append(cwd.subDirs, newDirectory(subDir, cwd))
 		default:
 			// This is a file listing
 			lsOutput := strings.Split(text, " ")
@@ -104,9 +94,35 @@ type directory struct {
 	name    string
 	size    int
 	parent  *directory
-	subDirs []directory
+	subDirs []*directory
 }
 
-func (d directory) updateSize(size int) {
+func newDirectory(name string, parent *directory) *directory {
+	return &directory{
+		name:    name,
+		parent:  parent,
+		subDirs: []*directory{},
+	}
+}
+
+func (d *directory) updateSize(size int) {
 	d.size += size
+
+	if d.parent != nil {
+		d.parent.updateSize(size)
+	}
+}
+
+func (d *directory) filterSizes(sizeLimit int) int {
+	total := 0
+	if len(d.subDirs) != 0 {
+		for _, subDir := range d.subDirs {
+			total += subDir.filterSizes(sizeLimit)
+		}
+	}
+
+	if d.size <= sizeLimit {
+		return total + d.size
+	}
+	return total
 }

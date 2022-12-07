@@ -20,4 +20,9 @@ func TestParseLine(t *testing.T) {
 		fmt.Printf("subDir: %s, %#v\n", subDir.name, subDir)
 	}
 
+	total := root.filterSizes(100000)
+
+	if total != 95437 {
+		t.Fatalf("got: %d, want: 95437", total)
+	}
 }

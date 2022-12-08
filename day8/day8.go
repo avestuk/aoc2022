@@ -155,7 +155,7 @@ func mostScenic(trees [][]int) int {
 		if i == 0 || i == len(trees)-1 {
 			continue
 		}
-		for j, tree := range row {
+		for j, tree := range row[1 : len(trees)-1] {
 			// Stop if you reach an edge or a tree that is the same height or taller
 			// Include that three
 			var (
@@ -164,7 +164,7 @@ func mostScenic(trees [][]int) int {
 
 			// check Left
 			// TODO Account for edge
-			for k := j - 1; k >= 0; k-- {
+			for k := j; k >= 0; k-- {
 				horizontalComparison := row[k]
 				if tree <= horizontalComparison {
 					countLeft += 1
@@ -174,7 +174,7 @@ func mostScenic(trees [][]int) int {
 			}
 
 			// Check Right
-			for k := j + 1; k <= len(row)-1; k++ {
+			for k := j + 2; k <= len(row)-1; k++ {
 				horizontalComparison := row[k]
 				if tree <= horizontalComparison {
 					countRight += 1
@@ -185,7 +185,7 @@ func mostScenic(trees [][]int) int {
 
 			// Check top
 			for k := i - 1; k >= 0; k-- {
-				verticalComparison := trees[k][j]
+				verticalComparison := trees[k][j+1]
 				if tree <= verticalComparison {
 					countTop += 1
 					break
@@ -195,7 +195,7 @@ func mostScenic(trees [][]int) int {
 
 			// Check bottom
 			for k := i + 1; k <= len(trees)-1; k++ {
-				verticalComparison := trees[k][j]
+				verticalComparison := trees[k][j+1]
 				if tree <= verticalComparison {
 					countBottom += 1
 					break

@@ -28,9 +28,10 @@ func Day8PartTwo(file string) (int, error) {
 	}
 	defer close()
 
-	_ = parseLines(s)
+	trees := parseLines(s)
+	mostScenic := mostScenic(trees)
 
-	return 0, nil
+	return mostScenic, nil
 }
 
 func parseLines(s *bufio.Scanner) [][]int {
@@ -145,4 +146,70 @@ func countVisible(trees [][]int) int {
 	}
 
 	return visibleCount
+}
+
+func mostScenic(trees [][]int) int {
+	mostScenic := 0
+
+	for i, row := range trees {
+		if i == 0 || i == len(trees)-1 {
+			continue
+		}
+		for j, tree := range row {
+			// Stop if you reach an edge or a tree that is the same height or taller
+			// Include that three
+			var (
+				countLeft, countRight, countTop, countBottom int
+			)
+
+			// check Left
+			// TODO Account for edge
+			for k := j - 1; k >= 0; k-- {
+				horizontalComparison := row[k]
+				if tree <= horizontalComparison {
+					countLeft += 1
+					break
+				}
+				countLeft += 1
+			}
+
+			// Check Right
+			for k := j + 1; k <= len(row)-1; k++ {
+				horizontalComparison := row[k]
+				if tree <= horizontalComparison {
+					countRight += 1
+					break
+				}
+				countRight += 1
+			}
+
+			// Check top
+			for k := i - 1; k >= 0; k-- {
+				verticalComparison := trees[k][j]
+				if tree <= verticalComparison {
+					countTop += 1
+					break
+				}
+				countTop += 1
+			}
+
+			// Check bottom
+			for k := i + 1; k <= len(trees)-1; k++ {
+				verticalComparison := trees[k][j]
+				if tree <= verticalComparison {
+					countBottom += 1
+					break
+				}
+				countBottom += 1
+			}
+
+			total := countBottom * countTop * countRight * countLeft
+			if total > mostScenic {
+				mostScenic = total
+			}
+
+		}
+
+	}
+	return mostScenic
 }

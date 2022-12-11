@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	output, err := day10.Day10("./day10/input.txt")
+	output, err := day10.Day10PartTwo("./day10/input.txt")
 	if err != nil {
 		fmt.Print(err)
 	}

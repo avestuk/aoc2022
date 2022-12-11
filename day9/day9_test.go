@@ -44,7 +44,8 @@ func TestParseMove(t *testing.T) {
 	for s.Scan() {
 		H, T, visitedPoints = parseMove(s.Text(), H, T, visitedPoints)
 
-		if visitedPoints[i] != want[i] {
+		wantPoint := want[i]
+		if visitedPoints[i] != wantPoint {
 			t.Fatalf("got: %v from: %s (%d), want: %v", visitedPoints, s.Text(), i, want[i])
 		}
 		i++
@@ -134,12 +135,19 @@ func TestMoveT(t *testing.T) {
 		t.Fatalf("case6: got: %v != want: %v", got, want)
 	}
 
+	got = moveT(point{3, 2}, point{2, 0})
+	want = point{3, 1}
+
+	if got != want {
+		t.Fatalf("case7: got: %v != want: %v", got, want)
+	}
+
 }
 
 func TestMoveRight(t *testing.T) {
 	h1 := point{0, 0}
 	t1 := point{0, 0}
-	move := 4
+	distace := 4
 	wantH2 := point{4, 0}
 	wantT2 := point{3, 0}
 	wantVisitedPoints := []point{
@@ -149,7 +157,7 @@ func TestMoveRight(t *testing.T) {
 		{3, 0},
 	}
 
-	gotH2, gotT2, gotVisitedPoints := moveRight(h1, t1, move, []point{{0, 0}})
+	gotH2, gotT2, gotVisitedPoints := move(h1, t1, distace, []point{{0, 0}}, moveRightf)
 
 	if gotH2 != wantH2 {
 		t.Fatalf("got: %v, want:%v", gotH2, wantH2)
@@ -168,7 +176,7 @@ func TestMoveRight(t *testing.T) {
 func TestMoveLeft(t *testing.T) {
 	h1 := point{0, 0}
 	t1 := point{0, 0}
-	move := 4
+	distance := 4
 	wantH2 := point{-4, 0}
 	wantT2 := point{-3, 0}
 	wantVisitedPoints := []point{
@@ -178,7 +186,7 @@ func TestMoveLeft(t *testing.T) {
 		{-3, 0},
 	}
 
-	gotH2, gotT2, gotVisitedPoints := moveLeft(h1, t1, move, []point{{0, 0}})
+	gotH2, gotT2, gotVisitedPoints := move(h1, t1, distance, []point{{0, 0}}, moveLeftf)
 
 	if gotH2 != wantH2 {
 		t.Fatalf("got: %v, want:%v", gotH2, wantH2)
@@ -192,12 +200,70 @@ func TestMoveLeft(t *testing.T) {
 
 	}
 
+	h1 = point{-2, 2}
+	t1 = point{-2, 1}
+	h2, t2, _ := move(h1, t1, 1, []point{}, moveLeftf)
+
+	wantH := point{-3, 2}
+	if h2 != wantH {
+		t.Fatalf("got: %v, want:%v", h2, point{-3, 2})
+	}
+	wantT := point{-2, 1}
+	if t2 != wantT {
+		t.Fatalf("got: %v, want:%v", t2, wantT)
+	}
+
+}
+
+func TestMove(t *testing.T) {
+	h1 := point{0, 0}
+	t1 := point{0, 0}
+	distance := 4
+	wantH2 := point{-4, 0}
+	wantT2 := point{-3, 0}
+	wantVisitedPoints := []point{
+		{0, 0},
+		{-1, 0},
+		{-2, 0},
+		{-3, 0},
+	}
+
+	gotH2, gotT2, gotVisitedPoints := move(h1, t1, distance, []point{{0, 0}}, func(H point, i int) point {
+		return point{H.x - i, H.y}
+	})
+
+	if gotH2 != wantH2 {
+		t.Fatalf("got: %v, want:%v", gotH2, wantH2)
+	}
+	if gotT2 != wantT2 {
+		t.Fatalf("got: %v, want:%v", gotT2, wantT2)
+
+	}
+	if !reflect.DeepEqual(gotVisitedPoints, wantVisitedPoints) {
+		t.Fatalf("got: %v, want:%v", gotVisitedPoints, wantVisitedPoints)
+
+	}
+
+	h1 = point{-2, 2}
+	t1 = point{-2, 1}
+	h2, t2, _ := move(h1, t1, 1, []point{}, func(H point, i int) point {
+		return point{H.x - i, H.y}
+	})
+
+	wantH := point{-3, 2}
+	if h2 != wantH {
+		t.Fatalf("got: %v, want:%v", h2, point{-3, 2})
+	}
+	wantT := point{-2, 1}
+	if t2 != wantT {
+		t.Fatalf("got: %v, want:%v", t2, wantT)
+	}
 }
 
 func TestMoveUp(t *testing.T) {
 	h1 := point{0, 0}
 	t1 := point{0, 0}
-	move := 4
+	distance := 4
 	wantH2 := point{0, 4}
 	wantT2 := point{0, 3}
 	wantVisitedPoints := []point{
@@ -207,7 +273,7 @@ func TestMoveUp(t *testing.T) {
 		{0, 3},
 	}
 
-	gotH2, gotT2, gotVisitedPoints := moveUp(h1, t1, move, []point{{0, 0}})
+	gotH2, gotT2, gotVisitedPoints := move(h1, t1, distance, []point{{0, 0}}, moveUpf)
 
 	if gotH2 != wantH2 {
 		t.Fatalf("got: %v, want:%v", gotH2, wantH2)
@@ -226,7 +292,7 @@ func TestMoveUp(t *testing.T) {
 func TestMoveDown(t *testing.T) {
 	h1 := point{0, 0}
 	t1 := point{0, 0}
-	move := 4
+	distance := 4
 	wantH2 := point{0, -4}
 	wantT2 := point{0, -3}
 	wantVisitedPoints := []point{
@@ -236,7 +302,7 @@ func TestMoveDown(t *testing.T) {
 		{0, -3},
 	}
 
-	gotH2, gotT2, gotVisitedPoints := moveDown(h1, t1, move, []point{{0, 0}})
+	gotH2, gotT2, gotVisitedPoints := move(h1, t1, distance, []point{{0, 0}}, moveDownf)
 
 	if gotH2 != wantH2 {
 		t.Fatalf("got: %v, want:%v", gotH2, wantH2)

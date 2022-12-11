@@ -16,11 +16,16 @@ func Day9(file string) (int, error) {
 	}
 	defer close()
 
+	i := 0
 	H := point{0, 0}
 	T := point{0, 0}
 	visitedPoints := []point{}
 	for s.Scan() {
+		i++
 		H, T, visitedPoints = parseMove(s.Text(), H, T, visitedPoints)
+		if !pointsTouching(H, T) {
+			panic(fmt.Sprintf("H: %v, T: %v not touching, s: %s, i: %d", H, T, s.Text(), i))
+		}
 	}
 
 	return len(visitedPoints), nil
@@ -35,8 +40,8 @@ func parseMove(s string, H, T point, visitedPoints []point) (point, point, []poi
 		visitedPoints = append(visitedPoints, point{0, 0})
 	}
 
-	move := strings.Split(s, " ")
-	direction, lengthStr := move[0], move[1]
+	input := strings.Split(s, " ")
+	direction, lengthStr := input[0], input[1]
 
 	length, err := strconv.Atoi(lengthStr)
 	if err != nil {
@@ -45,13 +50,13 @@ func parseMove(s string, H, T point, visitedPoints []point) (point, point, []poi
 
 	switch direction {
 	case "R":
-		return moveRight(H, T, length, visitedPoints)
+		return move(H, T, length, visitedPoints, moveRightf)
 	case "L":
-		return moveLeft(H, T, length, visitedPoints)
+		return move(H, T, length, visitedPoints, moveLeftf)
 	case "D":
-		return moveDown(H, T, length, visitedPoints)
+		return move(H, T, length, visitedPoints, moveDownf)
 	case "U":
-		return moveUp(H, T, length, visitedPoints)
+		return move(H, T, length, visitedPoints, moveUpf)
 	default:
 		panic(fmt.Sprintf("could not match direction: %s", direction))
 	}
@@ -66,10 +71,25 @@ func pointsTouching(p1, p2 point) bool {
 	return false
 }
 
-func moveRight(H1, T point, v int, visitedPoints []point) (point, point, []point) {
+var (
+	moveLeftf = func(H point, i int) point {
+		return point{H.x - i, H.y}
+	}
+	moveRightf = func(H point, i int) point {
+		return point{H.x + i, H.y}
+	}
+	moveUpf = func(H point, i int) point {
+		return point{H.x, H.y + i}
+	}
+	moveDownf = func(H point, i int) point {
+		return point{H.x, H.y - i}
+	}
+)
+
+func move(H1, T point, v int, visitedPoints []point, moveH func(H point, i int) point) (point, point, []point) {
 	var h2, t2 point
 	for i := 1; i <= v; i++ {
-		h2 = point{H1.x + i, H1.y}
+		h2 = moveH(H1, i)
 
 		if !pointsTouching(h2, T) {
 			t2 = moveT(h2, T)
@@ -88,86 +108,10 @@ func moveRight(H1, T point, v int, visitedPoints []point) (point, point, []point
 		}
 	}
 
-	return h2, t2, visitedPoints
+	return h2, T, visitedPoints
 
 }
 
-func moveLeft(H1, T point, v int, visitedPoints []point) (point, point, []point) {
-	var h2, t2 point
-	for i := 1; i <= v; i++ {
-		h2 = point{H1.x - i, H1.y}
-
-		if !pointsTouching(h2, T) {
-			t2 = moveT(h2, T)
-			var t2Visited bool
-			for _, p := range visitedPoints {
-				if p == t2 {
-					t2Visited = true
-					break
-				}
-			}
-
-			if !t2Visited {
-				visitedPoints = append(visitedPoints, t2)
-			}
-			T = t2
-		}
-	}
-
-	return h2, t2, visitedPoints
-
-}
-
-func moveUp(H1, T point, v int, visitedPoints []point) (point, point, []point) {
-	var h2, t2 point
-	for i := 1; i <= v; i++ {
-		h2 = point{H1.x, H1.y + i}
-
-		if !pointsTouching(h2, T) {
-			t2 = moveT(h2, T)
-			var t2Visited bool
-			for _, p := range visitedPoints {
-				if p == t2 {
-					t2Visited = true
-					break
-				}
-			}
-
-			if !t2Visited {
-				visitedPoints = append(visitedPoints, t2)
-			}
-			T = t2
-		}
-	}
-
-	return h2, t2, visitedPoints
-
-}
-func moveDown(H1, T point, v int, visitedPoints []point) (point, point, []point) {
-	var h2, t2 point
-	for i := 1; i <= v; i++ {
-		h2 = point{H1.x, H1.y - i}
-
-		if !pointsTouching(h2, T) {
-			t2 = moveT(h2, T)
-			var t2Visited bool
-			for _, p := range visitedPoints {
-				if p == t2 {
-					t2Visited = true
-					break
-				}
-			}
-
-			if !t2Visited {
-				visitedPoints = append(visitedPoints, t2)
-			}
-			T = t2
-		}
-	}
-
-	return h2, t2, visitedPoints
-
-}
 func moveT(H, T point) point {
 	dX := H.x - T.x
 	dY := H.y - T.y
